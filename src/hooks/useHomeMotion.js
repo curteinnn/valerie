@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
+import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -8,7 +10,23 @@ export default function useHomeMotion() {
   const root = useRef(null);
 
   useLayoutEffect(() => {
+    const titleSplits = [];
     const ctx = gsap.context(() => {
+      const lenis = new Lenis({ autoRaf: false });
+      const syncScrollTrigger = () => ScrollTrigger.update();
+      const runLenis = (time) => lenis.raf(time * 1000);
+      lenis.on("scroll", syncScrollTrigger);
+      gsap.ticker.add(runLenis);
+      gsap.ticker.lagSmoothing(0);
+
+      gsap.utils.toArray(".stagger-title").forEach((title) => {
+        const split = new SplitType(title, { types: "words" });
+        split.words?.forEach((word, index) => {
+          word.style.setProperty("--word-index", index);
+        });
+        titleSplits.push(split);
+      });
+
       const media = gsap.matchMedia();
       media.add(
         {
@@ -87,12 +105,15 @@ export default function useHomeMotion() {
           });
 
           gsap.utils.toArray(".stagger-title").forEach((title) => {
-            const words = title.querySelectorAll(".word-shell");
+            const words = title.querySelectorAll(".word");
             if (!words.length) return;
             const isHorizontalPanel = Boolean(title.closest(".horizontal-track"));
-            gsap.from(words, {
-              y: 80,
+            gsap.fromTo(words, {
               autoAlpha: 0,
+              clipPath: "inset(100% 0 0 0)",
+            }, {
+              autoAlpha: 1,
+              clipPath: "inset(0% 0 0 0)",
               duration: 0.72,
               stagger: 0.1,
               ease: "power3.out",
@@ -131,7 +152,7 @@ export default function useHomeMotion() {
             });
           });
 
-          const handleHorizontalAnchor = (event) => {
+          const handleSmoothAnchor = (event) => {
             const clicked = event.target instanceof Element
               ? event.target.closest('a[href^="#"]')
               : null;
@@ -141,25 +162,38 @@ export default function useHomeMotion() {
             const panels = horizontalTrack
               ? Array.from(horizontalTrack.children)
               : [];
-            if (!panel || !horizontalTween?.scrollTrigger) return;
+            if (!target) return;
 
             event.preventDefault();
-            const panelIndex = panels.indexOf(panel);
-            const trigger = horizontalTween.scrollTrigger;
-            const progress = panelIndex / Math.max(panels.length - 1, 1);
             history.pushState(null, "", href);
-            window.scrollTo({
-              top: trigger.start + (trigger.end - trigger.start) * progress,
-              behavior: "smooth",
-            });
+            if (panel && horizontalTween?.scrollTrigger) {
+              const panelIndex = panels.indexOf(panel);
+              const trigger = horizontalTween.scrollTrigger;
+              const progress = panelIndex / Math.max(panels.length - 1, 1);
+              lenis.scrollTo(
+                trigger.start + (trigger.end - trigger.start) * progress,
+                { duration: 1.1 },
+              );
+            } else {
+              lenis.scrollTo(target, { offset: -66, duration: 1.1 });
+            }
           };
-          document.addEventListener("click", handleHorizontalAnchor);
-          return () => document.removeEventListener("click", handleHorizontalAnchor);
+          document.addEventListener("click", handleSmoothAnchor);
+          return () => document.removeEventListener("click", handleSmoothAnchor);
         },
       );
-      return () => media.revert();
+      return () => {
+        media.revert();
+        lenis.off("scroll", syncScrollTrigger);
+        gsap.ticker.remove(runLenis);
+        lenis.destroy();
+        gsap.ticker.lagSmoothing(500, 33);
+      };
     }, root);
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      titleSplits.forEach((split) => split.revert());
+    };
   }, []);
 
   return root;
