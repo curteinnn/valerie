@@ -11,7 +11,7 @@ export default function SiteNav() {
   return (
     <nav className="site-nav" aria-label="Main navigation">
       <a className="nav-mark" href="#home" aria-label="VALERIE, home">
-        V.
+        VALERIE
       </a>
       <div className="nav-links">
         {links.map(([label, href]) => (

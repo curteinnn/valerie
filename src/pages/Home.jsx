@@ -206,15 +206,15 @@ export default function Home() {
           <Words text="HELLO" /><span className="contact-arrow" aria-hidden="true">↗</span>
         </h2>
         <p className="contact-placeholder">[BOOKING EMAIL] · [SOCIAL LINKS]</p>
+        <div className="contact-meta">
+          <a className="contact-meta-brand" href="#home">VALERIE®</a>
+          <span>AN OPEN-ENDED ARCHIVE</span>
+          <a href="#home">BACK TO TOP ↑</a>
+          <span>© {new Date().getFullYear()}</span>
+        </div>
       </section>
         </div>
       </div>
-      <footer className="site-footer">
-        <a href="#home">VALERIE®</a>
-        <span>AN OPEN-ENDED ARCHIVE</span>
-        <a href="#home">BACK TO TOP ↑</a>
-        <span>© {new Date().getFullYear()}</span>
-      </footer>
     </main>
   );
 }
