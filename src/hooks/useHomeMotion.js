@@ -21,7 +21,7 @@ export default function useHomeMotion() {
           const isMobile = context.conditions.mobile;
           const horizontalTrack = root.current?.querySelector(".horizontal-track");
           let horizontalTween;
-          if (!isMobile && horizontalTrack) {
+          if (horizontalTrack) {
             horizontalTween = gsap.to(horizontalTrack, {
               x: () => -(horizontalTrack.scrollWidth - window.innerWidth),
               ease: "none",
