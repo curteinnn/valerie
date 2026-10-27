@@ -28,7 +28,7 @@ export default function useHomeMotion() {
               scrollTrigger: {
                 id: "valerie-horizontal-panels",
                 trigger: ".horizontal-scroll",
-                start: "top top",
+                start: "bottom bottom",
                 end: () => `+=${horizontalTrack.scrollWidth - window.innerWidth}`,
                 pin: true,
                 scrub: 1,
