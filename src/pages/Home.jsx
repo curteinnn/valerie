@@ -103,6 +103,8 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="horizontal-scroll">
+        <div className="horizontal-track">
       <section className="music-section section-pad" id="music">
         <SectionHeading
           index="03"
@@ -205,6 +207,8 @@ export default function Home() {
         </h2>
         <p className="contact-placeholder">[BOOKING EMAIL] · [SOCIAL LINKS]</p>
       </section>
+        </div>
+      </div>
       <footer className="site-footer">
         <a href="#home">VALERIE®</a>
         <span>AN OPEN-ENDED ARCHIVE</span>

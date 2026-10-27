@@ -97,3 +97,18 @@
   .stagger-title:hover .title-word{transform:scale(1.08);transition-delay:calc(var(--word-index,0)*42ms)}
 }
 @media(prefers-reduced-motion:reduce){.title-word{transition:none}}
+
+.horizontal-scroll{position:relative}
+@media(min-width:701px) and (prefers-reduced-motion:no-preference){
+  .horizontal-track{display:flex;width:max-content}
+  .horizontal-track>section{
+    flex:0 0 100vw;
+    width:100vw;
+    height:100vh;
+    min-height:100vh;
+    max-height:100vh;
+    overflow:hidden;
+    padding-top:clamp(76px,10vh,145px);
+    padding-bottom:clamp(54px,8vh,100px);
+  }
+}

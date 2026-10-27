@@ -19,6 +19,25 @@ export default function useHomeMotion() {
         },
         (context) => {
           const isMobile = context.conditions.mobile;
+          const horizontalTrack = root.current?.querySelector(".horizontal-track");
+          let horizontalTween;
+          if (!isMobile && horizontalTrack) {
+            horizontalTween = gsap.to(horizontalTrack, {
+              x: () => -(horizontalTrack.scrollWidth - window.innerWidth),
+              ease: "none",
+              scrollTrigger: {
+                id: "valerie-horizontal-panels",
+                trigger: ".horizontal-scroll",
+                start: "top top",
+                end: () => `+=${horizontalTrack.scrollWidth - window.innerWidth}`,
+                pin: true,
+                scrub: 1,
+                invalidateOnRefresh: true,
+                anticipatePin: 1,
+              },
+            });
+          }
+
           gsap.from(".hero-word", {
             // opacity: 0,
             y: 28,
@@ -70,6 +89,7 @@ export default function useHomeMotion() {
           gsap.utils.toArray(".stagger-title").forEach((title) => {
             const words = title.querySelectorAll(".word-shell");
             if (!words.length) return;
+            const isHorizontalPanel = Boolean(title.closest(".horizontal-track"));
             gsap.from(words, {
               y: 80,
               autoAlpha: 0,
@@ -78,7 +98,9 @@ export default function useHomeMotion() {
               ease: "power3.out",
               scrollTrigger: {
                 trigger: title,
-                start: "top 82%",
+                ...(isHorizontalPanel && horizontalTween
+                  ? { containerAnimation: horizontalTween, start: "left 82%" }
+                  : { start: "top 82%" }),
                 once: true,
               },
             });
@@ -92,6 +114,7 @@ export default function useHomeMotion() {
             revealGroups.set(parent, group);
           });
           revealGroups.forEach((elements, parent) => {
+            const isHorizontalPanel = Boolean(parent.closest(".horizontal-track"));
             gsap.from(elements, {
               y: 42,
               autoAlpha: 0,
@@ -100,11 +123,38 @@ export default function useHomeMotion() {
               ease: "power2.out",
               scrollTrigger: {
                 trigger: parent,
-                start: "top 84%",
+                ...(isHorizontalPanel && horizontalTween
+                  ? { containerAnimation: horizontalTween, start: "left 84%" }
+                  : { start: "top 84%" }),
                 once: true,
               },
             });
           });
+
+          const handleHorizontalAnchor = (event) => {
+            const clicked = event.target instanceof Element
+              ? event.target.closest('a[href^="#"]')
+              : null;
+            const href = clicked?.getAttribute("href");
+            const target = href ? document.querySelector(href) : null;
+            const panel = target?.closest(".horizontal-track > section");
+            const panels = horizontalTrack
+              ? Array.from(horizontalTrack.children)
+              : [];
+            if (!panel || !horizontalTween?.scrollTrigger) return;
+
+            event.preventDefault();
+            const panelIndex = panels.indexOf(panel);
+            const trigger = horizontalTween.scrollTrigger;
+            const progress = panelIndex / Math.max(panels.length - 1, 1);
+            history.pushState(null, "", href);
+            window.scrollTo({
+              top: trigger.start + (trigger.end - trigger.start) * progress,
+              behavior: "smooth",
+            });
+          };
+          document.addEventListener("click", handleHorizontalAnchor);
+          return () => document.removeEventListener("click", handleHorizontalAnchor);
         },
       );
       return () => media.revert();
